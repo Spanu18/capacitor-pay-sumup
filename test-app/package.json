@@ -1,0 +1,20 @@
+{
+  "name": "capacitor-pay-sumup-test-app",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Minimal Capacitor app for manually exercising capacitor-pay-sumup's native API.",
+  "scripts": {
+    "build": "esbuild src/index.js --bundle --format=esm --outfile=www/index.js",
+    "sync": "npm run build && cap sync"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.1.0",
+    "@capacitor/core": "^8.1.0",
+    "@capacitor/ios": "^8.1.0",
+    "capacitor-pay-sumup": "file:.."
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.1.0",
+    "esbuild": "^0.24.0"
+  }
+}

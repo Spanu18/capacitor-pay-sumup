@@ -14,7 +14,10 @@ import com.getcapacitor.annotation.CapacitorPlugin;
 import com.sumup.merchant.reader.api.SumUpAPI;
 import com.sumup.merchant.reader.api.SumUpLogin;
 import com.sumup.merchant.reader.api.SumUpPayment;
+import com.sumup.merchant.reader.models.Merchant;
 import com.sumup.reader.sdk.api.SumUpState;
+
+import org.json.JSONObject;
 
 import java.math.BigDecimal;
 import java.util.Locale;
@@ -24,10 +27,12 @@ public class SumUpPlugin extends Plugin {
 
     private static final int LOGIN_REQUEST_CODE = 1001;
     private static final int CHECKOUT_REQUEST_CODE = 1002;
+    private static final int CARD_READER_REQUEST_CODE = 1004;
 
     private String affiliateKey;
     private String loginCallbackId;
     private String checkoutCallbackId;
+    private String cardReaderCallbackId;
 
     @Override
     public void load() {
@@ -74,6 +79,30 @@ public class SumUpPlugin extends Plugin {
     }
 
     @PluginMethod
+    public void isLoggedIn(PluginCall call) {
+        JSObject result = new JSObject();
+        result.put("isLoggedIn", SumUpAPI.isLoggedIn());
+        call.resolve(result);
+    }
+
+    @PluginMethod
+    public void getCurrentMerchant(PluginCall call) {
+        Merchant merchant = SumUpAPI.getCurrentMerchant();
+
+        JSObject result = new JSObject();
+        if (merchant != null) {
+            SumUpPayment.Currency currency = merchant.getCurrency();
+            String merchantCode = merchant.getMerchantCode();
+            result.put("currencyCode", currency != null ? currency.getIsoCode() : JSONObject.NULL);
+            result.put("merchantCode", merchantCode != null ? merchantCode : JSONObject.NULL);
+        } else {
+            result.put("currencyCode", JSONObject.NULL);
+            result.put("merchantCode", JSONObject.NULL);
+        }
+        call.resolve(result);
+    }
+
+    @PluginMethod
     public void checkout(PluginCall call) {
         Double amount = call.getDouble("amount");
         String currencyCode = call.getString("currency");
@@ -94,17 +123,43 @@ public class SumUpPlugin extends Plugin {
 
         // Note: unlike iOS, the standard SumUp Android checkout flow does not expose a
         // tapToPay/cardReader selector - the SDK picks the available payment method itself.
-        SumUpPayment payment = SumUpPayment.builder()
+        SumUpPayment.Builder paymentBuilder = SumUpPayment.builder()
             .total(BigDecimal.valueOf(amount))
             .currency(currency)
-            .title(title)
-            .build();
+            .title(title);
+
+        Double tipAmount = call.getDouble("tipAmount");
+        if (tipAmount != null) {
+            paymentBuilder.tip(BigDecimal.valueOf(tipAmount));
+        }
+
+        String foreignTransactionID = call.getString("foreignTransactionID");
+        if (foreignTransactionID != null) {
+            paymentBuilder.foreignTransactionId(foreignTransactionID);
+        }
+
+        SumUpPayment payment = paymentBuilder.build();
 
         bridge.saveCall(call);
         this.checkoutCallbackId = call.getCallbackId();
 
         Activity activity = getActivity();
         activity.runOnUiThread(() -> SumUpAPI.checkout(activity, payment, CHECKOUT_REQUEST_CODE));
+    }
+
+    @PluginMethod
+    public void prepareForCheckout(PluginCall call) {
+        SumUpAPI.prepareForCheckout();
+        call.resolve();
+    }
+
+    @PluginMethod
+    public void openCheckoutPreferences(PluginCall call) {
+        bridge.saveCall(call);
+        this.cardReaderCallbackId = call.getCallbackId();
+
+        Activity activity = getActivity();
+        activity.runOnUiThread(() -> SumUpAPI.openCardReaderPage(activity, CARD_READER_REQUEST_CODE));
     }
 
     @PluginMethod
@@ -140,6 +195,8 @@ public class SumUpPlugin extends Plugin {
             handleLoginResult(resultCode, data);
         } else if (requestCode == CHECKOUT_REQUEST_CODE) {
             handleCheckoutResult(resultCode, data);
+        } else if (requestCode == CARD_READER_REQUEST_CODE) {
+            handleCardReaderResult(resultCode);
         }
     }
 
@@ -171,10 +228,28 @@ public class SumUpPlugin extends Plugin {
                 == SumUpAPI.Response.ResultCode.SUCCESSFUL) {
             JSObject result = new JSObject();
             result.put("success", true);
+
+            String transactionCode = data.getStringExtra(SumUpAPI.Response.TX_CODE);
+            if (transactionCode != null) {
+                result.put("transactionCode", transactionCode);
+            }
+
             call.resolve(result);
         } else {
             call.reject(extractMessage(data, "Checkout failed"));
         }
+    }
+
+    private void handleCardReaderResult(int resultCode) {
+        PluginCall call = getSavedCall(this.cardReaderCallbackId);
+        this.cardReaderCallbackId = null;
+        if (call == null) {
+            return;
+        }
+
+        JSObject result = new JSObject();
+        result.put("success", resultCode == Activity.RESULT_OK);
+        call.resolve(result);
     }
 
     @NonNull

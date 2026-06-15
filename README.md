@@ -39,8 +39,12 @@ dependencyResolutionManagement {
 
 * [`setup(...)`](#setup)
 * [`login(...)`](#login)
-* [`checkout(...)`](#checkout)
+* [`isLoggedIn()`](#isloggedin)
+* [`getCurrentMerchant()`](#getcurrentmerchant)
 * [`logout()`](#logout)
+* [`prepareForCheckout()`](#prepareforcheckout)
+* [`checkout(...)`](#checkout)
+* [`openCheckoutPreferences()`](#opencheckoutpreferences)
 * [`checkTapToPay()`](#checktaptopay)
 * [`activateTapToPay()`](#activatetaptopay)
 
@@ -62,13 +66,24 @@ login(options: { accessToken: string }) => Promise<{ success: boolean }>
 
 Log in to a SumUp merchant account using an OAuth access token.
 
-### checkout(...)
+### isLoggedIn()
 
 ```ts
-checkout(options: SumUpCheckoutOptions) => Promise<{ success: boolean }>
+isLoggedIn() => Promise<{ isLoggedIn: boolean }>
 ```
 
-Present the SumUp checkout flow for a single payment.
+Check whether a merchant is currently logged in. The session persists across app restarts,
+so call this on launch to decide whether `login()` is needed.
+
+### getCurrentMerchant()
+
+```ts
+getCurrentMerchant() => Promise<SumUpMerchant>
+```
+
+Get the currency and merchant code of the currently logged-in merchant. Both fields are
+`null` if no merchant is logged in. Useful for validating that `checkout()`'s `currency`
+matches the merchant's currency before presenting checkout.
 
 ### logout()
 
@@ -77,6 +92,35 @@ logout() => Promise<{ success: boolean }>
 ```
 
 Log out of the current SumUp merchant account.
+
+### prepareForCheckout()
+
+```ts
+prepareForCheckout() => Promise<void>
+```
+
+Let the SDK know that a checkout is imminent (e.g. while the user is entering an amount),
+so it can take steps like waking a connected card reader ahead of time.
+
+### checkout(...)
+
+```ts
+checkout(options: SumUpCheckoutOptions) => Promise<SumUpCheckoutResult>
+```
+
+Present the SumUp checkout flow for a single payment. `options` accepts an optional
+`tipAmount` and `foreignTransactionID`. The resolved result includes a `transactionCode`
+for reconciling the payment with SumUp's REST API, and (iOS only) `additionalInfo` with
+card details.
+
+### openCheckoutPreferences()
+
+```ts
+openCheckoutPreferences() => Promise<{ success: boolean }>
+```
+
+Present SumUp's checkout preferences screen, where the merchant can pair/configure a card
+reader and adjust checkout settings.
 
 ### checkTapToPay()
 

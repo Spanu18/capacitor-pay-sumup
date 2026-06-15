@@ -36,6 +36,18 @@ public class SumUpPlugin: CAPPlugin {
         }
     }
 
+    @objc func isLoggedIn(_ call: CAPPluginCall) {
+        call.resolve(["isLoggedIn": SumUpSDK.isLoggedIn])
+    }
+
+    @objc func getCurrentMerchant(_ call: CAPPluginCall) {
+        let merchant = SumUpSDK.currentMerchant
+        call.resolve([
+            "currencyCode": merchant?.currencyCode ?? NSNull(),
+            "merchantCode": merchant?.merchantCode ?? NSNull(),
+        ])
+    }
+
     @objc func checkout(_ call: CAPPluginCall) {
         guard let amount = call.getDouble("amount"),
               let currency = call.getString("currency"),
@@ -65,6 +77,14 @@ public class SumUpPlugin: CAPPlugin {
         )
         request.paymentMethod = paymentMethod ?? .cardReader
 
+        if let tipAmount = call.getDouble("tipAmount") {
+            request.tipAmount = NSDecimalNumber(value: tipAmount)
+        }
+
+        if let foreignTransactionID = call.getString("foreignTransactionID") {
+            request.foreignTransactionID = foreignTransactionID
+        }
+
         DispatchQueue.main.async {
             guard let viewController = self.bridge?.viewController else {
                 call.reject("No view controller")
@@ -73,9 +93,38 @@ public class SumUpPlugin: CAPPlugin {
 
             SumUpSDK.checkout(with: request, from: viewController) { result, error in
                 if result?.success == true {
-                    call.resolve(["success": true])
+                    var response: [String: Any] = ["success": true]
+                    if let transactionCode = result?.transactionCode {
+                        response["transactionCode"] = transactionCode
+                    }
+                    if let additionalInfo = result?.additionalInfo {
+                        response["additionalInfo"] = additionalInfo
+                    }
+                    call.resolve(response)
                 } else {
                     call.reject(error?.localizedDescription ?? "Checkout failed")
+                }
+            }
+        }
+    }
+
+    @objc func prepareForCheckout(_ call: CAPPluginCall) {
+        SumUpSDK.prepareForCheckout()
+        call.resolve()
+    }
+
+    @objc func openCheckoutPreferences(_ call: CAPPluginCall) {
+        DispatchQueue.main.async {
+            guard let viewController = self.bridge?.viewController else {
+                call.reject("No view controller available")
+                return
+            }
+
+            SumUpSDK.presentCheckoutPreferences(from: viewController, animated: true) { success, error in
+                if let error = error {
+                    call.reject(error.localizedDescription)
+                } else {
+                    call.resolve(["success": success])
                 }
             }
         }

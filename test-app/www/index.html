@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="viewport-fit=cover, width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>SumUp Plugin Test</title>
+    <link rel="stylesheet" href="index.css" />
+  </head>
+  <body>
+    <main>
+      <h1>capacitor-pay-sumup test</h1>
+
+      <section>
+        <h2>1. Setup &amp; Auth</h2>
+        <label>Affiliate key<input id="affiliateKey" type="text" placeholder="SumUp affiliate key" /></label>
+        <label>Access token<input id="accessToken" type="text" placeholder="SumUp OAuth access token" /></label>
+        <div class="row">
+          <button data-action="setup">setup()</button>
+          <button data-action="login">login()</button>
+          <button data-action="logout">logout()</button>
+        </div>
+        <div class="row">
+          <button data-action="isLoggedIn">isLoggedIn()</button>
+          <button data-action="getCurrentMerchant">getCurrentMerchant()</button>
+        </div>
+      </section>
+
+      <section>
+        <h2>2. Checkout</h2>
+        <label>Amount<input id="amount" type="number" step="0.01" value="1.00" /></label>
+        <label>Currency<input id="currency" type="text" value="EUR" /></label>
+        <label>Title<input id="title" type="text" value="Test order" /></label>
+        <label>Payment method
+          <select id="paymentMethod">
+            <option value="">(default: cardReader)</option>
+            <option value="cardReader">cardReader</option>
+            <option value="tapToPay">tapToPay</option>
+          </select>
+        </label>
+        <label>Tip amount (optional)<input id="tipAmount" type="number" step="0.01" placeholder="0.00" /></label>
+        <label>Foreign transaction ID (optional)<input id="foreignTransactionID" type="text" placeholder="my-order-123" /></label>
+        <div class="row">
+          <button data-action="prepareForCheckout">prepareForCheckout()</button>
+          <button data-action="checkout">checkout()</button>
+          <button data-action="openCheckoutPreferences">openCheckoutPreferences()</button>
+        </div>
+      </section>
+
+      <section>
+        <h2>3. Tap to Pay (iOS only)</h2>
+        <div class="row">
+          <button data-action="checkTapToPay">checkTapToPay()</button>
+          <button data-action="activateTapToPay">activateTapToPay()</button>
+        </div>
+      </section>
+
+      <section>
+        <h2>Log</h2>
+        <div class="row">
+          <button data-action="clearLog">Clear log</button>
+        </div>
+        <pre id="log"></pre>
+      </section>
+    </main>
+    <script type="module" src="index.js"></script>
+  </body>
+</html>

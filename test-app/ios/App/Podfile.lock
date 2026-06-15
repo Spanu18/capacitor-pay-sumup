@@ -1,0 +1,35 @@
+PODS:
+  - Capacitor (8.4.0):
+    - CapacitorCordova
+  - CapacitorCordova (8.4.0)
+  - CapacitorPaySumup (0.0.1):
+    - Capacitor
+    - SumUpSDK
+  - SumUpSDK (6.1.1)
+
+DEPENDENCIES:
+  - "Capacitor (from `../../node_modules/@capacitor/ios`)"
+  - "CapacitorCordova (from `../../node_modules/@capacitor/ios`)"
+  - CapacitorPaySumup (from `../../node_modules/capacitor-pay-sumup`)
+
+SPEC REPOS:
+  trunk:
+    - SumUpSDK
+
+EXTERNAL SOURCES:
+  Capacitor:
+    :path: "../../node_modules/@capacitor/ios"
+  CapacitorCordova:
+    :path: "../../node_modules/@capacitor/ios"
+  CapacitorPaySumup:
+    :path: "../../node_modules/capacitor-pay-sumup"
+
+SPEC CHECKSUMS:
+  Capacitor: 75bd117ba037a51bb0f19ded32c67f4b3bc16600
+  CapacitorCordova: 71d81f350e6c30bf2a846593b5c480fbd68e9bac
+  CapacitorPaySumup: 8682eab1607329488faa8c3da299b5f3745575c7
+  SumUpSDK: d10627760709308f34ab9e093212c642cfff0bb7
+
+PODFILE CHECKSUM: 0c05fe0599f9a18e15eb237f97fac29377b1addc
+
+COCOAPODS: 1.16.2
