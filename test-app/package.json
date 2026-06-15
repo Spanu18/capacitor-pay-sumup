@@ -11,7 +11,7 @@
     "@capacitor/android": "^8.1.0",
     "@capacitor/core": "^8.1.0",
     "@capacitor/ios": "^8.1.0",
-    "capacitor-pay-sumup": "file:.."
+    "@capacitor-pay/sumup": "file:.."
   },
   "devDependencies": {
     "@capacitor/cli": "^8.1.0",

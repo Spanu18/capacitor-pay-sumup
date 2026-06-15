@@ -1,11 +1,11 @@
 # capacitor-pay-sumup
 
-SumUp provider plugin for [`capacitor-pay`](https://github.com/Spanu18/capacitor-pay), wrapping the SumUp SDK for in-app card and Tap to Pay checkout. Can also be used standalone without `capacitor-pay`.
+SumUp provider plugin for [`@capacitor-pay/core`](https://github.com/capacitor-pay/capacitor-pay), wrapping the SumUp SDK for in-app card and Tap to Pay checkout. Can also be used standalone without `@capacitor-pay/core`.
 
 ## Install
 
 ```bash
-npm install capacitor-pay-sumup
+npm install @capacitor-pay/sumup
 npx cap sync
 ```
 

@@ -1,5 +1,5 @@
 import { Capacitor } from '@capacitor/core'
-import { SumUp } from 'capacitor-pay-sumup'
+import { SumUp } from '@capacitor-pay/sumup'
 
 const logEl = document.getElementById('log')
 
